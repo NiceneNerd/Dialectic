@@ -1,0 +1,42 @@
+body {
+    font-family: "Segoe UI", Candara, "Bitstream Vera Sans", "DejaVu Sans",
+        "Bitstream Vera Sans", "Trebuchet MS", Verdana, "Verdana Ref",
+        sans-serif;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: "Reforma 1918", Constantia, "Lucida Bright", Lucidabright,
+        "Lucida Serif", Lucida, "DejaVu Serif", "Bitstream Vera Serif",
+        "Liberation Serif", Georgia, serif;
+}
+
+.comments {
+    margin: 0 auto;
+    max-width: 1200px;
+}
+
+.comments-title {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.comments-form {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #CFD8DC;
+    margin-bottom: 1rem;
+}
+
+.comments-form .comments-textarea {
+    flex: 1;
+    margin: 0 1rem;
+}
+
+.comments-form .comments-submit {
+    margin: 0.25rem 0.5rem;
+    padding: 0.5rem;
+    background-color: #7E57C2;
+    color: white;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.12);
+}

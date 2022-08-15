@@ -1,9 +1,10 @@
 table! {
     comments (id) {
-        id -> Integer,
-        username -> Varchar,
-        email -> Nullable<Varchar>,
+        id -> Unsigned<Bigint>,
+        name -> Varchar,
+        #[sql_name = "comment"]
         body -> Text,
+        upvotes -> Integer,
         date_posted -> Timestamp,
     }
 }

@@ -6,7 +6,7 @@ use models::NewComment;
 mod models;
 mod schema;
 use self::{models::Comment, schema::comments::dsl::*};
-use rocket::*;
+use rocket::{request::Form, *};
 use rocket_contrib::{
     database, databases::diesel::MysqlConnection, json::Json, serve::StaticFiles,
 };
@@ -24,9 +24,9 @@ fn get_comments(conn: CommentDbConn) -> Json<Vec<Comment>> {
 }
 
 #[post("/comments", data = "<comment>")]
-fn new_comment(conn: CommentDbConn, comment: Json<NewComment>) {
+fn new_comment(comment: Form<NewComment>, conn: CommentDbConn) {
     diesel::insert_into(comments)
-        .values(&comment.0)
+        .values(&comment.into_inner())
         .execute(&*conn)
         .expect("Error saving new comment");
 }

@@ -5,17 +5,17 @@ use super::schema::comments;
 
 #[derive(Queryable, Serialize)]
 pub struct Comment {
-    pub id: i32,
-    pub username: String,
-    pub email: Option<String>,
+    pub id: u64,
+    pub name: String,
     pub body: String,
+    pub upvotes: i32,
     pub date_posted: chrono::NaiveDateTime,
 }
 
-#[derive(serde::Deserialize, Insertable)]
+#[derive(serde::Deserialize, FromForm, Insertable)]
 #[table_name = "comments"]
 pub struct NewComment {
-    pub username: String,
-    pub email: Option<String>,
-    pub body: String,
+    pub name: String,
+    #[column_name = "body"]
+    pub comment: String,
 }

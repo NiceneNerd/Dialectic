@@ -1,35 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>Some Based Article - Dialectic</title>
-    </head>
-    <body>
-        <header>
-            <h1>Dialectic</h1>
-        </header>
-        <main>
-            <article>
-                <header>
-                    <h2>De Ipsa Sacra Doctrina</h2>
-                </header>
-                <p>
-                    Et ut intentio nostra sub aliquibus certis limitibus comprehendatur, necessarium est primo investigare de
-                    ipsa sacra doctrina, qualis sit, et ad quae se extendat. Circa quae quaerenda sunt decem. Primo, de
-                    necessitate huius doctrinae. Secundo, utrum sit scientia. Tertio, utrum sit una vel plures. Quarto, utrum
-                    sit speculativa vel practica. Quinto, de comparatione eius ad alias scientias. Sexto, utrum sit sapientia.
-                    Septimo, quid sit subiectum eius. Octavo, utrum sit argumentativa. Nono, utrum uti debeat metaphoricis vel
-                    symbolicis locutionibus. Decimo, utrum Scriptura sacra huius doctrinae sit secundum plures sensus exponenda.
-                </p>
-            </article>
-            <footer>
-                <h3>Comments</h3>
-                <div>
-                    
-                </div>
-            </footer>
-        </main>
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Some Based Article - Dialectic</title>
+    <link rel="stylesheet" href="/reset.css" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/comments.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            await comments.load();
+        });
+    </script>
+</head>
+
+<template id="comment-template">
+    <div class="comment">
+        <div class="comment-header">
+            <div class="comment-author">
+                <span class="comment-author-name"></span>
+                <span class="comment-author-date"></span>
+            </div>
+            <div class="comment-actions">
+                <button class="comment-action-reply" onclick="comments.reply(this)">Reply</button>
+            </div>
+        </div>
+        <div class="comment-body">
+            <p></p>
+        </div>
+    </div>
+</template>
+
+<body>
+    <main class="comments">
+        <h3 class="comments-title">Discussion</h3>
+        <form class="comments-form" action="/api/comments" method="post">
+            <input type="hidden" name="name" id="name" value="Voronwe Sintamo" />
+            <div class="avatar">
+                <img src="/images/avatar.png" alt="Avatar" />
+            </div>
+            <textarea class="comments-textarea" name="comment" id="comment" name="text"
+                placeholder="Write your comment here..." rows="1"></textarea>
+            <input type="submit" class="comments-submit" value="Comment" />
+        </form>
+        <div id="comment-list">
+            <p>No comments yet</p>
+        </div>
+    </main>
+</body>
+
 </html>
