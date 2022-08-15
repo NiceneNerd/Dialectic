@@ -1,2 +1,2 @@
 [global.databases.dialectic]
-url = "mysql://wordpress:wordpress@localhost/wordpress"
+url = "mysql://root:root@127.0.0.1:3307/dialectic"
