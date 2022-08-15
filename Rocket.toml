@@ -1,0 +1,2 @@
+[global.databases.dialectic]
+url = "mysql://wordpress:wordpress@localhost/wordpress"
