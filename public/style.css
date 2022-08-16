@@ -103,8 +103,14 @@ h5 {
   padding: 0.5rem 0;
 }
 
+.comment-actions {
+  display: flex;
+  align-items: baseline;
+}
+
 .comment-actions button {
   cursor: pointer;
+  margin: 0 0.5rem;
   transition: color 0.25s ease-in-out;
 }
 
