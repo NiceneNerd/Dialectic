@@ -17,17 +17,25 @@
 
 <template id="comment-template">
     <div class="comment">
-        <div class="comment-header">
-            <div class="comment-author">
-                <span class="comment-author-name"></span>
-                <span class="comment-author-date"></span>
+        <div class="comment-avatar">
+            <img class="avatar" />
+        </div>
+        <div class="comment-content">
+            <div class="comment-header">
+                <div class="comment-author">
+                    <span class="comment-author-name"></span>
+                    ·
+                    <span class="comment-author-date"></span>
+                </div>
+            </div>
+            <div class="comment-body">
+                <p></p>
             </div>
             <div class="comment-actions">
-                <button class="comment-action-reply" onclick="comments.reply(this)">Reply</button>
+                <button class="comment-action-upvote" onclick="comments.upvote(this.dataset.commentId)">⏶
+                    Upvote</button>
+                <!-- <button class="comment-action-reply" onclick="comments.reply(this)">Reply</button> -->
             </div>
-        </div>
-        <div class="comment-body">
-            <p></p>
         </div>
     </div>
 </template>
@@ -37,8 +45,8 @@
         <h3 class="comments-title">Discussion</h3>
         <form class="comments-form" action="/api/comments" method="post">
             <input type="hidden" name="name" id="name" value="Voronwe Sintamo" />
-            <div class="avatar">
-                <img src="/images/avatar.png" alt="Avatar" />
+            <div>
+                <img class="avatar" src="/images/Voronwë.jpg" alt="Voronwe Sintamo" />
             </div>
             <textarea class="comments-textarea" name="comment" id="comment" name="text"
                 placeholder="Write your comment here..." rows="1"></textarea>
