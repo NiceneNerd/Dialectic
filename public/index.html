@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
@@ -9,53 +9,62 @@
     <link rel="stylesheet" href="/style.css" />
     <script src="/comments.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            await comments.load();
-        });
+      document.addEventListener("DOMContentLoaded", async () => {
+        await comments.load();
+        document.querySelector(".comments-textarea").focus();
+      });
     </script>
-</head>
+  </head>
 
-<template id="comment-template">
+  <template id="comment-template">
     <div class="comment">
-        <div class="comment-avatar">
-            <img class="avatar" />
+      <div class="comment-avatar">
+        <img class="avatar" />
+      </div>
+      <div class="comment-content">
+        <div class="comment-header">
+          <div class="comment-author">
+            <span class="comment-author-name"></span>
+            ⸱
+            <span class="comment-author-date"></span>
+          </div>
         </div>
-        <div class="comment-content">
-            <div class="comment-header">
-                <div class="comment-author">
-                    <span class="comment-author-name"></span>
-                    ·
-                    <span class="comment-author-date"></span>
-                </div>
-            </div>
-            <div class="comment-body">
-                <p></p>
-            </div>
-            <div class="comment-actions">
-                <button class="comment-action-upvote" onclick="comments.upvote(this.dataset.commentId)">⏶
-                    Upvote</button>
-                <!-- <button class="comment-action-reply" onclick="comments.reply(this)">Reply</button> -->
-            </div>
+        <div class="comment-body">
+          <p></p>
         </div>
+        <div class="comment-actions">
+          <button class="comment-action-upvote" onclick="comments.upvote(this)">
+            ⏶ Upvote (<span class="comment-upvote-count">0</span>)
+          </button>
+          <!-- <button class="comment-action-reply" onclick="comments.reply(this)">Reply</button> -->
+        </div>
+      </div>
     </div>
-</template>
+  </template>
 
-<body>
+  <body>
     <main class="comments">
-        <h3 class="comments-title">Discussion</h3>
-        <form class="comments-form" action="/api/comments" method="post">
-            <input type="hidden" name="name" id="name" value="Voronwe Sintamo" />
-            <div>
-                <img class="avatar" src="/images/Voronwë.jpg" alt="Voronwe Sintamo" />
-            </div>
-            <textarea class="comments-textarea" name="comment" id="comment" name="text"
-                placeholder="Write your comment here..." rows="1"></textarea>
-            <input type="submit" class="comments-submit" value="Comment" />
-        </form>
-        <div id="comment-list">
-            <p>No comments yet</p>
+      <h3 class="comments-title">Discussion</h3>
+      <form class="comments-form" onsubmit="comments.submit(this); return false;">
+        <input type="hidden" name="name" id="name" value="Voronwë" />
+        <div>
+          <img class="avatar" src="/images/Voronwë.jpg" alt="Voronwë" />
         </div>
+        <textarea
+          class="comments-textarea"
+          name="comment"
+          id="comment"
+          name="text"
+          placeholder="What makest thou of this matter?"
+          rows="1"
+          required
+        ></textarea>
+        <input type="submit" class="comments-submit" value="Comment" />
+      </form>
+      <div id="comment-list">
+        <p>No comments yet</p>
+      </div>
     </main>
-</body>
-
+    <div id="toast" class="hidden">Comment added</div>
+  </body>
 </html>
