@@ -1,0 +1,19 @@
+.toast {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+  padding: 0.5rem;
+  font-size: 10pt;
+  z-index: 9999;
+  opacity: 1;
+  border-radius: 0.2rem;
+  background-color: #66bb6a;
+  box-shadow: rgba(0, 0, 0, 0.5) 0 0 0.333rem 0;
+  color: white;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.toast.hidden {
+  opacity: 0;
+}

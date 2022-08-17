@@ -6,10 +6,8 @@ edition = "2021"
 [dependencies]
 chrono = { version = "0.4.22", features = ["serde"] }
 diesel = { version = "1.4.8", features = ["mysql", "chrono"] }
-rocket = "0.4.11"
+flume = "0.10.14"
+rocket = {version = "0.5.0-rc.2", features = ["json" ] }
+rocket_sync_db_pools = { version = "0.1.0-rc.2", features = ["diesel_mysql_pool"] }
 serde = { version = "1.0.143", features = ["derive"] }
 
-[dependencies.rocket_contrib]
-version = "0.4.11"
-default-features = false
-features = ["diesel_mysql_pool", "serve", "json"]

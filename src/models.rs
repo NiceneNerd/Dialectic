@@ -18,7 +18,6 @@ pub struct Comment {
 #[table_name = "comments"]
 pub struct NewComment {
     pub name: String,
-    #[column_name = "body"]
-    pub comment: String,
+    pub body: String,
     pub parent_id: Option<u64>,
 }

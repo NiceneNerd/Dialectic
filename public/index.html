@@ -5,66 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Some Based Article - Dialectic</title>
-    <link rel="stylesheet" href="/reset.css" />
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/comments.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        await comments.load();
-        document.querySelector(".comments-textarea").focus();
-      });
-    </script>
   </head>
-
-  <template id="comment-template">
-    <div class="comment">
-      <div class="comment-avatar">
-        <img class="avatar" />
-      </div>
-      <div class="comment-content">
-        <div class="comment-header">
-          <div class="comment-author">
-            <span class="comment-author-name"></span>
-            ⸱
-            <span class="comment-author-date"></span>
-          </div>
-        </div>
-        <div class="comment-body">
-          <p></p>
-        </div>
-        <div class="comment-actions">
-          <button class="comment-action-upvote" onclick="comments.upvote(this)">
-            ⏶ Upvote (<span class="comment-upvote-count">0</span>)
-          </button>
-          <button class="comment-action-reply" onclick="comments.reply(this)">Reply</button>
-        </div>
-      </div>
-    </div>
-  </template>
-
   <body>
-    <main class="comments">
-      <h3 class="comments-title">Discussion</h3>
-      <form class="comments-form" onsubmit="comments.submit(this); return false;">
-        <input type="hidden" name="name" id="name" value="Voronwë" />
-        <div>
-          <img class="avatar" src="/images/Voronwë.jpg" alt="Voronwë" />
-        </div>
-        <textarea
-          class="comments-textarea"
-          name="comment"
-          id="comment"
-          name="text"
-          placeholder="What makest thou of this matter?"
-          rows="1"
-          required
-        ></textarea>
-        <input type="submit" class="comments-submit" value="Comment" />
-      </form>
-      <div id="comment-list">
-        <p>No comments yet</p>
-      </div>
-    </main>
-    <div id="toast" class="hidden">Comment added</div>
+    <div id="root"></div>
   </body>
 </html>
