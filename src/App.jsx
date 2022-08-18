@@ -5,13 +5,13 @@ import "./reset.css";
 import Toast from "./components/Toast.jsx";
 
 const USER = "Voronwë";
+let evtSource = new EventSource("/api/upvotes");
 
 export default function App() {
   let [body, setBody] = React.useState("");
   let [comments, setComments] = React.useState([]);
   let [showToast, setShowToast] = React.useState(false);
 
-  let evtSource = React.useRef(new EventSource("/api/upvotes"));
   const updateComment = (comment) => {
     setComments((comments) => {
       return comments.map((c) => {
@@ -23,25 +23,19 @@ export default function App() {
     });
   };
 
+  evtSource.onmessage = (e) => {
+    updateComment(JSON.parse(e.data));
+  };
+
   const fetchComments = async () => {
     const response = await fetch("/api/comments");
     const data = await response.json();
     setComments(data);
   };
 
-  // evtSource.current.onmessage = (e) => {
-  //   updateComment(JSON.parse(e.data));
-  // };
-
   React.useEffect(() => {
     fetchComments();
   }, []);
-
-  // React.useEffect(() => {
-  //   if (evtSource.current.readyState == EventSource.CLOSED) {
-  //     evtSource.current = new EventSource("/api/upvotes");
-  //   }
-  // }, [comments]);
 
   const toast = () => {
     setShowToast(true);
@@ -51,18 +45,10 @@ export default function App() {
   };
 
   const handleUpvote = async (id) => {
-    console.log("Handling upvote for comment with id: " + id);
-    // if (evtSource.current.readyState == EventSource.OPEN) {
-    //   evtSource.current.close();
-    // }
-    // console.log("Closed event source");
     const response = await fetch(`/api/comments/upvote/${id}`, {
-      method: "POST",
-      body: console.log("Hey")
+      method: "POST"
     });
-    console.log("Fetched response");
     const comment = await response.json();
-    console.log("Parsed response");
     updateComment(comment);
   };
 
