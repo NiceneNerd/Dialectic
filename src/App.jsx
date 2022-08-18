@@ -13,18 +13,23 @@ export default function App() {
 
   let evtSource = new EventSource("/api/upvotes");
   const updateComment = (comment) => {
-    evtSource = null;
-    setComments(
-      comments.map((c) => {
+    console.log(comments);
+    setComments((comments) => {
+      return comments.map((c) => {
         if (c.id == comment.id) {
           c.upvotes = comment.upvotes;
         }
         return c;
-      })
-    );
+      });
+    });
+    if (evtSource.readyState == evtSource.CLOSED) {
+      console.log("Reloading event stream", comments);
+      evtSource = new EventSource("/api/upvotes");
+      evtSource.onmessage = onUpvoteMsg;
+    }
   };
   const onUpvoteMsg = (e) => {
-    console.log(e);
+    console.log(e, comments);
     const upvoteData = JSON.parse(e.data);
     updateComment(upvoteData);
   };
@@ -40,11 +45,6 @@ export default function App() {
     fetchComments();
   }, []);
 
-  React.useEffect(() => {
-    evtSource = new EventSource("/api/upvotes");
-    evtSource.onmessage = onUpvoteMsg;
-  }, [comments]);
-
   const toast = () => {
     setShowToast(true);
     setTimeout(() => {
@@ -52,19 +52,29 @@ export default function App() {
     }, 2500);
   };
 
+  const handleUpvote = async (id) => {
+    evtSource.close();
+    evtSource.onmessage = null;
+    const response = await fetch(`/api/comments/upvote/${id}`, {
+      method: "POST"
+    });
+    const comment = await response.json();
+    updateComment(comment);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
       name: USER,
       body,
-      parent_id: null,
+      parent_id: null
     };
     const response = await fetch("/api/comments", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     });
     const comment = await response.json();
     setComments([...comments, comment]);
@@ -94,7 +104,7 @@ export default function App() {
         <div className="comments-list">
           {comments.length > 0 ? (
             comments.map((comment) => (
-              <Comment onUpvote={updateComment} key={comment.id} {...comment} />
+              <Comment onUpvote={handleUpvote} key={comment.id} {...comment} />
             ))
           ) : (
             <p>No comments yet</p>

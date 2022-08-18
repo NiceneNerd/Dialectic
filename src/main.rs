@@ -65,24 +65,27 @@ async fn new_comment(comment: Json<NewComment>, db: CommentDbConn) -> Json<Comme
 #[post("/comments/upvote/<id>")]
 async fn upvote_comment(id: u64, db: CommentDbConn, ctx: &State<UpvoteSender>) -> Json<Comment> {
     let ctx = ctx.0.clone();
-    db.run(move |conn| {
-        let rows = diesel::update(comments.find(id))
-            .set(upvotes.eq(upvotes + 1))
-            .execute(&*conn)
-            .expect("Error updating comment");
-        assert_eq!(rows, 1, "Expected to update one row");
-        let comment = comments
-            .find(id)
-            .first::<Comment>(&*conn)
-            .expect("Error loading comment");
-        ctx.send(UpvoteUpdate {
-            id,
-            upvotes: comment.upvotes,
+    let res = db
+        .run(move |conn| {
+            let rows = diesel::update(comments.find(id))
+                .set(upvotes.eq(upvotes + 1))
+                .execute(&*conn)
+                .expect("Error updating comment");
+            assert_eq!(rows, 1, "Expected to update one row");
+            let comment = comments
+                .find(id)
+                .first::<Comment>(&*conn)
+                .expect("Error loading comment");
+            Json(comment)
         })
-        .expect("Failed to send upvote notification");
-        Json(comment)
+        .await;
+    ctx.send_async(UpvoteUpdate {
+        id,
+        upvotes: res.0.upvotes,
     })
     .await
+    .expect("Failed to send upvote notification");
+    res
 }
 
 #[get("/upvotes")]
@@ -99,7 +102,7 @@ async fn stream(ctx: &State<UpvoteReceiver>, mut shutdown: Shutdown) -> EventStr
 
 #[launch]
 fn rocket() -> _ {
-    let (send, recv): (Sender<UpvoteUpdate>, Receiver<UpvoteUpdate>) = unbounded();
+    let (send, recv): (Sender<UpvoteUpdate>, Receiver<UpvoteUpdate>) = bounded(1);
     rocket::build()
         .attach(CommentDbConn::fairing())
         .manage(UpvoteSender(send))

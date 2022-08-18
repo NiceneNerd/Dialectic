@@ -2,14 +2,6 @@ import React from "react";
 import "./Comment.css";
 
 export default function Comment(props) {
-  const handleUpvote = async () => {
-    const response = await fetch(`/api/comments/upvote/${props.id}`, {
-        method: "POST",
-      });
-    const comment = await response.json();
-    props.onUpvote(comment);
-  };
-
   return (
     <div className="comment">
       <div className="comment-avatar">
@@ -26,10 +18,17 @@ export default function Comment(props) {
           <p>{props.body}</p>
         </div>
         <div className="comment-actions">
-          <button className="comment-action-upvote" onClick={handleUpvote}>
-            ⏶ Upvote (<span className="comment-upvote-count">{props.upvotes}</span>)
+          <button
+            className="comment-action-upvote"
+            onClick={() => props.onUpvote(props.id)}
+          >
+            ⏶ Upvote (
+            <span className="comment-upvote-count">{props.upvotes}</span>)
           </button>
-          <button className="comment-action-reply" onclick="comments.reply(this)">
+          <button
+            className="comment-action-reply"
+            onclick="comments.reply(this)"
+          >
             Reply
           </button>
         </div>
