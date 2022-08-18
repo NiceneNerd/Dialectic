@@ -3,7 +3,7 @@ import "./Comment.css";
 
 export default function Comment(props) {
   return (
-    <div className="comment">
+    <div className={"comment " + (props.parent_id && "nested")}>
       <div className="comment-avatar">
         <img className="avatar" src={`/images/${props.name}.jpg`} />
       </div>

@@ -1,8 +1,8 @@
 import React from "react";
 import Comment from "./components/Comment.jsx";
+import Toast from "./components/Toast.jsx";
 import "./App.css";
 import "./reset.css";
-import Toast from "./components/Toast.jsx";
 
 const USER = "Voronwë";
 let evtSource = new EventSource("/api/upvotes");
@@ -93,7 +93,16 @@ export default function App() {
         </form>
         <div className="comments-list">
           {comments.length > 0 ? (
-            comments.map((comment) => (
+            comments.sort((a, b) => {
+              if (a.parent_id && b.parent_id) {
+                return a.parent_id - b.parent_id;
+              } else if (a.parent_id == null) {
+                return a.id - b.parent_id;
+              } else if (b.parent_id == null) {
+                return a.parent_id - b.id;
+              }
+              return b.upvotes - a.upvotes;
+            }).map((comment) => (
               <Comment onUpvote={handleUpvote} key={comment.id} {...comment} />
             ))
           ) : (

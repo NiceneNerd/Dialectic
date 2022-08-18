@@ -3,6 +3,11 @@
   margin: 1.5rem 0;
 }
 
+.comment.nested {
+  border-left: 0.25rem solid #E0E0E0;
+  padding-left: 1rem;
+}
+
 .comment-content {
   padding: 0 1rem;
 }
