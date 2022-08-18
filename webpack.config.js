@@ -1,4 +1,5 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     module: {
@@ -9,14 +10,14 @@ module.exports = {
                 use: {
                     loader: "babel-loader",
                     options: {
-                        presets: ['@babel/preset-env', '@babel/preset-react']
+                        presets: ["@babel/preset-env", "@babel/preset-react"]
                     }
                 }
             },
             {
                 test: /\.css$/i,
                 exclude: /node_modules/,
-                use: ['style-loader', 'css-loader'],
+                use: ["style-loader", "css-loader"]
             },
             {
                 test: /\.html$/,
@@ -33,6 +34,9 @@ module.exports = {
         new HtmlWebPackPlugin({
             template: "./public/index.html",
             filename: "./index.html"
+        }),
+        new CopyPlugin({
+            patterns: [{ from: "public/images", to: "images" }]
         })
     ]
 };
