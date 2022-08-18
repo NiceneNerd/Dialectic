@@ -2,7 +2,7 @@
 #[macro_use]
 extern crate diesel;
 use diesel::prelude::*;
-use flume::{bounded, unbounded, Receiver, Sender};
+// use flume::{bounded, unbounded, Receiver, Sender};
 use models::NewComment;
 use schema::comments::date_posted;
 mod models;
@@ -15,6 +15,10 @@ use rocket::{
     fs::FileServer,
     response::stream::{Event, EventStream},
     serde::json::Json,
+    tokio::{
+        select,
+        sync::broadcast::{channel, error::RecvError, Sender},
+    },
     Shutdown, *,
 };
 use rocket_sync_db_pools::database;
@@ -22,15 +26,11 @@ use rocket_sync_db_pools::database;
 #[database("dialectic")]
 struct CommentDbConn(MysqlConnection);
 
-#[derive(rocket::serde::Serialize, Debug)]
+#[derive(rocket::serde::Serialize, Debug, Copy, Clone)]
 struct UpvoteUpdate {
     id: u64,
     upvotes: i32,
 }
-
-#[derive(Clone)]
-struct UpvoteSender(Sender<UpvoteUpdate>);
-struct UpvoteReceiver(Receiver<UpvoteUpdate>);
 
 #[get("/comments")]
 async fn get_comments(db: CommentDbConn) -> Json<Vec<Comment>> {
@@ -63,8 +63,11 @@ async fn new_comment(comment: Json<NewComment>, db: CommentDbConn) -> Json<Comme
 }
 
 #[post("/comments/upvote/<id>")]
-async fn upvote_comment(id: u64, db: CommentDbConn, ctx: &State<UpvoteSender>) -> Json<Comment> {
-    let ctx = ctx.0.clone();
+async fn upvote_comment(
+    id: u64,
+    db: CommentDbConn,
+    ctx: &State<Sender<UpvoteUpdate>>,
+) -> Json<Comment> {
     let res = db
         .run(move |conn| {
             let rows = diesel::update(comments.find(id))
@@ -79,34 +82,37 @@ async fn upvote_comment(id: u64, db: CommentDbConn, ctx: &State<UpvoteSender>) -
             Json(comment)
         })
         .await;
-    ctx.send_async(UpvoteUpdate {
+    let _ = ctx.send(UpvoteUpdate {
         id,
-        upvotes: res.0.upvotes,
-    })
-    .await
-    .expect("Failed to send upvote notification");
+        upvotes: res.upvotes,
+    });
     res
 }
 
 #[get("/upvotes")]
-async fn stream(ctx: &State<UpvoteReceiver>, mut shutdown: Shutdown) -> EventStream![Event + '_] {
+async fn stream(ctx: &State<Sender<UpvoteUpdate>>, mut end: Shutdown) -> EventStream![Event + '_] {
+    let mut recv = ctx.subscribe();
     EventStream! {
         loop {
-            if let Ok(upvote) = ctx.0.recv_async().await {
-                println!("upvote: {:?}", upvote);
-                yield Event::json(&upvote);
-            }
+            let msg = select! {
+                msg = recv.recv() => match msg {
+                    Ok(msg) => msg,
+                    Err(RecvError::Closed) => break,
+                    Err(RecvError::Lagged(_)) => continue,
+                },
+                _ = &mut end => break,
+            };
+
+            yield Event::json(&msg);
         }
     }
 }
 
 #[launch]
 fn rocket() -> _ {
-    let (send, recv): (Sender<UpvoteUpdate>, Receiver<UpvoteUpdate>) = bounded(1);
     rocket::build()
         .attach(CommentDbConn::fairing())
-        .manage(UpvoteSender(send))
-        .manage(UpvoteReceiver(recv))
+        .manage(channel::<UpvoteUpdate>(1024).0)
         .mount(
             "/api",
             routes![get_comments, new_comment, upvote_comment, stream],

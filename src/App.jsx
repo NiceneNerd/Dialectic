@@ -11,7 +11,7 @@ export default function App() {
   let [comments, setComments] = React.useState([]);
   let [showToast, setShowToast] = React.useState(false);
 
-  let evtSource = new EventSource("/api/upvotes");
+  let evtSource = React.useRef(new EventSource("/api/upvotes"));
   const updateComment = (comment) => {
     console.log(comments);
     setComments((comments) => {
@@ -22,23 +22,18 @@ export default function App() {
         return c;
       });
     });
-    if (evtSource.readyState == evtSource.CLOSED) {
-      console.log("Reloading event stream", comments);
-      evtSource = new EventSource("/api/upvotes");
-      evtSource.onmessage = onUpvoteMsg;
-    }
   };
-  const onUpvoteMsg = (e) => {
-    console.log(e, comments);
-    const upvoteData = JSON.parse(e.data);
-    updateComment(upvoteData);
-  };
-  evtSource.onmessage = onUpvoteMsg;
 
   const fetchComments = async () => {
+    console.log("Fetching comments");
     const response = await fetch("/api/comments");
     const data = await response.json();
     setComments(data);
+  };
+
+  evtSource.current.onmessage = (e) => {
+    console.log("Got an event");
+    fetchComments()
   };
 
   React.useEffect(() => {
@@ -53,8 +48,8 @@ export default function App() {
   };
 
   const handleUpvote = async (id) => {
-    evtSource.close();
-    evtSource.onmessage = null;
+    // evtSource.close();
+    // evtSource.onmessage = null;
     const response = await fetch(`/api/comments/upvote/${id}`, {
       method: "POST"
     });

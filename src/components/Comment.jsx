@@ -10,7 +10,7 @@ export default function Comment(props) {
       <div className="comment-content">
         <div className="comment-header">
           <div className="comment-author">
-            <span className="comment-author-name">{props.name}</span>⸱
+            <span className="comment-author-name">{props.name}</span>{' '}⸱{' '}
             <span className="comment-author-date">{props.date_posted}</span>
           </div>
         </div>
