@@ -68,13 +68,16 @@ async fn upvote_comment(
     db: CommentDbConn,
     ctx: &State<Sender<UpvoteUpdate>>,
 ) -> Json<Comment> {
+    println!("Upvoting comment {}", id);
     let res = db
         .run(move |conn| {
+            println!("Finding and updating comment {}", id);
             let rows = diesel::update(comments.find(id))
                 .set(upvotes.eq(upvotes + 1))
                 .execute(&*conn)
                 .expect("Error updating comment");
             assert_eq!(rows, 1, "Expected to update one row");
+            println!("Loading full comment {}", id);
             let comment = comments
                 .find(id)
                 .first::<Comment>(&*conn)
@@ -82,10 +85,12 @@ async fn upvote_comment(
             Json(comment)
         })
         .await;
+    println!("Sending update to client");
     let _ = ctx.send(UpvoteUpdate {
         id,
         upvotes: res.upvotes,
     });
+    println!("Sent upvote update to broadcast channel");
     res
 }
 
@@ -96,7 +101,10 @@ async fn stream(ctx: &State<Sender<UpvoteUpdate>>, mut end: Shutdown) -> EventSt
         loop {
             let msg = select! {
                 msg = recv.recv() => match msg {
-                    Ok(msg) => msg,
+                    Ok(msg) => {
+                        println!("Received upvote update from broadcast channel: {:?}", msg);
+                        msg
+                    },
                     Err(RecvError::Closed) => break,
                     Err(RecvError::Lagged(_)) => continue,
                 },

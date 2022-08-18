@@ -13,7 +13,6 @@ export default function App() {
 
   let evtSource = React.useRef(new EventSource("/api/upvotes"));
   const updateComment = (comment) => {
-    console.log(comments);
     setComments((comments) => {
       return comments.map((c) => {
         if (c.id == comment.id) {
@@ -25,20 +24,24 @@ export default function App() {
   };
 
   const fetchComments = async () => {
-    console.log("Fetching comments");
     const response = await fetch("/api/comments");
     const data = await response.json();
     setComments(data);
   };
 
-  evtSource.current.onmessage = (e) => {
-    console.log("Got an event");
-    fetchComments()
-  };
+  // evtSource.current.onmessage = (e) => {
+  //   updateComment(JSON.parse(e.data));
+  // };
 
   React.useEffect(() => {
     fetchComments();
   }, []);
+
+  // React.useEffect(() => {
+  //   if (evtSource.current.readyState == EventSource.CLOSED) {
+  //     evtSource.current = new EventSource("/api/upvotes");
+  //   }
+  // }, [comments]);
 
   const toast = () => {
     setShowToast(true);
@@ -48,12 +51,18 @@ export default function App() {
   };
 
   const handleUpvote = async (id) => {
-    // evtSource.close();
-    // evtSource.onmessage = null;
+    console.log("Handling upvote for comment with id: " + id);
+    // if (evtSource.current.readyState == EventSource.OPEN) {
+    //   evtSource.current.close();
+    // }
+    // console.log("Closed event source");
     const response = await fetch(`/api/comments/upvote/${id}`, {
-      method: "POST"
+      method: "POST",
+      body: console.log("Hey")
     });
+    console.log("Fetched response");
     const comment = await response.json();
+    console.log("Parsed response");
     updateComment(comment);
   };
 
