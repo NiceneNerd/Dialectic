@@ -287,6 +287,7 @@ dependencies = [
  "chrono",
  "diesel",
  "diesel_migrations",
+ "npm_rs",
  "rocket",
  "rocket_sync_db_pools",
 ]
@@ -805,6 +806,15 @@ checksum = "f61b381528ba293005c42a409dd73d034508e273bf90481f17ec2e964a6e969b"
 dependencies = [
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "npm_rs"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f664b3447458ff1c5fee7043990271072bccbd1300f151b2ae84fb461b442824"
+dependencies = [
+ "cfg-if",
 ]
 
 [[package]]

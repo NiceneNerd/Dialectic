@@ -1,5 +1,6 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const path = require("path");
 
 module.exports = {
     module: {
@@ -32,11 +33,14 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            template: "./public/index.html",
-            filename: "./index.html"
+            template: "../public/index.html",
+            filename: "../dist/index.html"
         }),
         new CopyPlugin({
-            patterns: [{ from: "public/images", to: "images" }]
+            patterns: [{ from: "../public/images", to: "images" }]
         })
-    ]
+    ],
+    output: {
+        path: path.resolve(__dirname, "../dist"),
+    }
 };
