@@ -1,6 +1,7 @@
 import React from "react";
-import "./Comment.css";
 import ReplyBox from "./ReplyBox.jsx";
+import prettyDate from "../pretty.js";
+import "./Comment.css";
 
 export default function Comment(props) {
   let [showReply, setShowReply] = React.useState(false);
@@ -22,7 +23,7 @@ export default function Comment(props) {
           <div className="comment-header">
             <div className="comment-author">
               <span className="comment-author-name">{props.name}</span> ⸱{" "}
-              <span className="comment-author-date">{props.date_posted}</span>
+              <span className="comment-author-date">{prettyDate(props.date_posted)}</span>
             </div>
           </div>
           <div className="comment-body">
