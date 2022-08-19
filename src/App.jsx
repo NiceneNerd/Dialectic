@@ -1,6 +1,8 @@
 import React from "react";
 import Comment from "./components/Comment.jsx";
+import ReplyBox from "./components/ReplyBox.jsx";
 import Toast from "./components/Toast.jsx";
+import { UserProvider } from "./UserContext.js";
 import "./App.css";
 import "./reset.css";
 
@@ -12,13 +14,21 @@ export default function App() {
   let [comments, setComments] = React.useState([]);
   let [showToast, setShowToast] = React.useState(false);
 
+  const nestedUpdate = (comment, id, upvotes) => {
+    if (comment.id == id) {
+      comment.upvotes = upvotes;
+    } else {
+      comment.children = comment.children.map((child) =>
+        nestedUpdate(child, id, upvotes)
+      );      
+    }
+    return comment;
+  };
+
   const updateComment = (comment) => {
     setComments((comments) => {
       return comments.map((c) => {
-        if (c.id == comment.id) {
-          c.upvotes = comment.upvotes;
-        }
-        return c;
+        return nestedUpdate(c, comment.id, comment.upvotes);
       });
     });
   };
@@ -46,28 +56,28 @@ export default function App() {
 
   const handleUpvote = async (id) => {
     const response = await fetch(`/api/comments/upvote/${id}`, {
-      method: "POST"
+      method: "POST",
     });
     const comment = await response.json();
     updateComment(comment);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, parent_id, commentBody) => {
     e.preventDefault();
     const data = {
       name: USER,
-      body,
-      parent_id: null
+      body: commentBody || body,
+      parent_id,
     };
     const response = await fetch("/api/comments", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
-    const comment = await response.json();
-    setComments([...comments, comment]);
+    fetchComments();
+    setBody("");
     toast();
   };
 
@@ -75,40 +85,27 @@ export default function App() {
     <>
       <main className="comments">
         <h3 className="comments-title">Discussion</h3>
-        <form className="comments-form" onSubmit={handleSubmit}>
-          <div>
-            <img className="avatar" src={`/images/${USER}.jpg`} alt={USER} />
-          </div>
-          <textarea
-            className="comments-textarea"
-            name="comment"
-            id="comment"
-            placeholder="What makest thou of this matter?"
-            rows="1"
-            required
-            value={body}
+        <UserProvider value={USER}>
+          <ReplyBox
+            onSubmit={handleSubmit}
             onChange={(e) => setBody(e.target.value)}
-          ></textarea>
-          <input type="submit" className="comments-submit" value="Comment" />
-        </form>
-        <div className="comments-list">
-          {comments.length > 0 ? (
-            comments.sort((a, b) => {
-              if (a.parent_id && b.parent_id) {
-                return a.parent_id - b.parent_id;
-              } else if (a.parent_id == null) {
-                return a.id - b.parent_id;
-              } else if (b.parent_id == null) {
-                return a.parent_id - b.id;
-              }
-              return b.upvotes - a.upvotes;
-            }).map((comment) => (
-              <Comment onUpvote={handleUpvote} key={comment.id} {...comment} />
-            ))
-          ) : (
-            <p>No comments yet</p>
-          )}
-        </div>
+            value={body}
+          />
+          <div className="comments-list">
+            {comments.length > 0 ? (
+              comments.map((comment) => (
+                <Comment
+                  onUpvote={handleUpvote}
+                  onReply={handleSubmit}
+                  key={comment.id}
+                  {...comment}
+                />
+              ))
+            ) : (
+              <p>No comments yet</p>
+            )}
+          </div>
+        </UserProvider>
       </main>
       <Toast show={showToast} />
     </>

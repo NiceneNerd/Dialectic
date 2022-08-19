@@ -3,13 +3,13 @@
 extern crate diesel;
 use diesel::prelude::*;
 // use flume::{bounded, unbounded, Receiver, Sender};
-use models::NewComment;
+use models::{NewComment, ResComment};
 use schema::comments::date_posted;
 mod models;
 mod schema;
 use self::{
     models::Comment,
-    schema::comments::dsl::{comments, upvotes},
+    schema::comments::dsl::{comments, parent_id, upvotes},
 };
 use rocket::{
     fs::FileServer,
@@ -26,6 +26,26 @@ use rocket_sync_db_pools::database;
 #[database("dialectic")]
 struct CommentDbConn(MysqlConnection);
 
+impl ResComment {
+    pub fn from_comment(comment: Comment, conn: &mut MysqlConnection) -> ResComment {
+        let children = comments
+            .filter(parent_id.eq(comment.id))
+            .load::<Comment>(conn)
+            .unwrap()
+            .into_iter()
+            .map(|c| ResComment::from_comment(c, conn))
+            .collect();
+        ResComment {
+            id: comment.id,
+            children,
+            name: comment.name,
+            body: comment.body,
+            upvotes: comment.upvotes,
+            date_posted: comment.date_posted,
+        }
+    }
+}
+
 #[derive(rocket::serde::Serialize, Debug, Copy, Clone)]
 struct UpvoteUpdate {
     id: u64,
@@ -33,31 +53,36 @@ struct UpvoteUpdate {
 }
 
 #[get("/comments")]
-async fn get_comments(db: CommentDbConn) -> Json<Vec<Comment>> {
+async fn get_comments(db: CommentDbConn) -> Json<Vec<ResComment>> {
     db.run(move |conn| {
         Json(
             comments
+                .filter(parent_id.is_null())
                 .load::<Comment>(&*conn)
-                .expect("Failed to load comments"),
+                .expect("Failed to load comments")
+                .into_iter()
+                .map(|c| ResComment::from_comment(c, &mut *conn))
+                .collect(),
         )
     })
     .await
 }
 
 #[post("/comments", data = "<comment>")]
-async fn new_comment(comment: Json<NewComment>, db: CommentDbConn) -> Json<Comment> {
+async fn new_comment(comment: Json<NewComment>, db: CommentDbConn) -> Json<ResComment> {
     db.run(move |conn| {
         diesel::insert_into(comments)
             .values(&comment.into_inner())
             .execute(conn)
             .expect("Error saving new comment");
-        Json(
+        Json(ResComment::from_comment(
             comments
                 .order(date_posted.desc())
                 .limit(1)
                 .first(&*conn)
                 .expect("Failed to load new comment"),
-        )
+            conn,
+        ))
     })
     .await
 }
@@ -67,7 +92,7 @@ async fn upvote_comment(
     id: u64,
     db: CommentDbConn,
     ctx: &State<Sender<UpvoteUpdate>>,
-) -> Json<Comment> {
+) -> Json<ResComment> {
     let res = db
         .run(move |conn| {
             let rows = diesel::update(comments.find(id))
@@ -79,7 +104,7 @@ async fn upvote_comment(
                 .find(id)
                 .first::<Comment>(&*conn)
                 .expect("Error loading comment");
-            Json(comment)
+            Json(ResComment::from_comment(comment, conn))
         })
         .await;
     let _ = ctx.send(UpvoteUpdate {

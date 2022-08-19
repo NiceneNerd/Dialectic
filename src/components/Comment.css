@@ -5,7 +5,8 @@
 
 .comment.nested {
   border-left: 0.25rem solid #E0E0E0;
-  padding-left: 1rem;
+  padding-left: 48px;
+  margin-left: 1rem;
 }
 
 .comment-content {
