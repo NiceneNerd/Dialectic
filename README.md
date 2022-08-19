@@ -6,7 +6,7 @@ A simple comment interface for an imaginary web article.
 
 - MySQL 8
 - A recent Node version
-- A recent Rust version
+- A recent nightly Rust toolchain
 
 ## Build and Run
 
@@ -17,16 +17,16 @@ compose file:
 ```yaml
 version: '3'
 services:
-    mysql:
-        image: mysql:latest
-        container_name: mysql8
-        volumes:
-            - ./data:/var/lib/mysql
-            - ./config/my.cnf:/etc/mysql/my.cnf
-            - ./logs/mysql.log:/var/log/mysql.log
-        ports:
-            - "3307:3306"
-        environment:
+    mysql:
+        image: mysql:latest
+        container_name: mysql8
+        volumes:
+            - "./data:/var/lib/mysql"
+            - "./config/my.cnf:/etc/mysql/my.cnf"
+            - "./logs/mysql.log:/var/log/mysql.log"
+        ports:
+            - "3307:3306"
+        environment:
             MYSQL_ROOT_USER: root
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: dialectic
