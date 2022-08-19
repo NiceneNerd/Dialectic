@@ -1,5 +1,15 @@
 # Ghost Coding Challenge Application
 
+A simple comment interface for an imaginary web article.
+
+## Requirements
+
+- MySQL 8
+- A recent Node version
+- A recent Rust version
+
+## Build and Run
+
 To run as-is, first start a MySQL server at `root:root@127.0.0.1:3307` and
 create a database named `dialectic`. You can do so using the following Docker
 compose file:
@@ -22,4 +32,4 @@ services:
             MYSQL_DATABASE: dialectic
 ```
 
-Then build and run with `cargo run`. A server will start at `localhost:8000`.
+Build and run with `cargo run`. A server will start at `localhost:8000`.
