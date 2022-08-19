@@ -13,6 +13,8 @@ export default function App() {
   let [body, setBody] = React.useState("");
   let [comments, setComments] = React.useState([]);
   let [showToast, setShowToast] = React.useState(false);
+  let [showError, setShowError] = React.useState(false);
+  let [errorMessage, setErrorMessage] = React.useState("");
 
   const nestedUpdate = (comment, id, upvotes) => {
     if (comment.id == id) {
@@ -20,7 +22,7 @@ export default function App() {
     } else {
       comment.children = comment.children.map((child) =>
         nestedUpdate(child, id, upvotes)
-      );      
+      );
     }
     return comment;
   };
@@ -39,8 +41,12 @@ export default function App() {
 
   const fetchComments = async () => {
     const response = await fetch("/api/comments");
-    const data = await response.json();
-    setComments(data);
+    if (response.ok) {
+      setComments(await response.json());
+    } else {
+      setShowError(true);
+      setErrorMessage(await response.text());
+    }
   };
 
   React.useEffect(() => {
@@ -55,11 +61,19 @@ export default function App() {
   };
 
   const handleUpvote = async (id) => {
-    const response = await fetch(`/api/comments/upvote/${id}`, {
-      method: "POST",
-    });
-    const comment = await response.json();
-    updateComment(comment);
+    try {
+      const response = await fetch(`/api/comments/upvote/${id}`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      const comment = await response.json();
+      updateComment(comment);
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage(error.message);
+    }
   };
 
   const handleSubmit = async (e, parent_id, commentBody) => {
@@ -69,13 +83,22 @@ export default function App() {
       body: commentBody || body,
       parent_id,
     };
-    const response = await fetch("/api/comments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage(await response.text());
+      return;
+    }
     fetchComments();
     setBody("");
     toast();
@@ -85,27 +108,35 @@ export default function App() {
     <>
       <main className="comments">
         <h3 className="comments-title">Discussion</h3>
-        <UserProvider value={USER}>
-          <ReplyBox
-            onSubmit={handleSubmit}
-            onChange={(e) => setBody(e.target.value)}
-            value={body}
-          />
-          <div className="comments-list">
-            {comments.length > 0 ? (
-              comments.map((comment) => (
-                <Comment
-                  onUpvote={handleUpvote}
-                  onReply={handleSubmit}
-                  key={comment.id}
-                  {...comment}
-                />
-              ))
-            ) : (
-              <p>No comments yet</p>
-            )}
+        {!showError ? (
+          <UserProvider value={USER}>
+            <ReplyBox
+              onSubmit={handleSubmit}
+              onChange={(e) => setBody(e.target.value)}
+              value={body}
+            />
+            <div className="comments-list">
+              {comments.length > 0 ? (
+                comments.map((comment) => (
+                  <Comment
+                    onUpvote={handleUpvote}
+                    onReply={handleSubmit}
+                    key={comment.id}
+                    {...comment}
+                  />
+                ))
+              ) : (
+                <p>No comments yet</p>
+              )}
+            </div>
+          </UserProvider>
+        ) : (
+          <div className="error">
+            <h5>Error</h5>
+            <p>{errorMessage}</p>
+            <p><a href="/">Reload</a></p>
           </div>
-        </UserProvider>
+        )}
       </main>
       <Toast show={showToast} />
     </>

@@ -5,15 +5,6 @@ body {
   padding: 1rem 2rem;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-  font-family: "Reforma 1918", Constantia, "Lucida Bright", Lucidabright, "Lucida Serif",
-    Lucida, "DejaVu Serif", "Bitstream Vera Serif", "Liberation Serif", Georgia, serif;
-}
-
 .avatar {
   width: 48px;
   max-width: 48px;
@@ -29,4 +20,26 @@ h5 {
 .comments-title {
   margin-bottom: 1rem;
   font-size: 2rem;
+}
+
+.error {
+  padding: 1rem;
+  background-color: #ffcdd2;
+  border: 1px solid #ef9a9a;
+  border-radius: 0.25rem;
+  color: #b71c1c;
+}
+
+.error h5 {
+  font-size: 14pt;
+  margin-bottom: 0.5rem;
+}
+
+.error p {
+  margin-top: 0.5rem;
+}
+
+.error a {
+  font-size: 10pt;
+  text-decoration: underline;
 }
