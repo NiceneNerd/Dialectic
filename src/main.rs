@@ -1,8 +1,9 @@
 #![feature(decl_macro)]
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
 use diesel::prelude::*;
-// use flume::{bounded, unbounded, Receiver, Sender};
 use models::{NewComment, ResComment};
 use schema::comments::date_posted;
 mod models;
@@ -12,6 +13,7 @@ use self::{
     schema::comments::dsl::{comments, parent_id, upvotes},
 };
 use rocket::{
+    fairing::AdHoc,
     fs::FileServer,
     response::stream::{Event, EventStream},
     serde::json::Json,
@@ -47,6 +49,7 @@ impl ResComment {
 }
 
 #[derive(rocket::serde::Serialize, Debug, Copy, Clone)]
+#[serde(crate = "rocket::serde")]
 struct UpvoteUpdate {
     id: u64,
     upvotes: i32,
@@ -133,10 +136,22 @@ async fn stream(ctx: &State<Sender<UpvoteUpdate>>, mut end: Shutdown) -> EventSt
     }
 }
 
+async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
+    embed_migrations!();
+    let conn = CommentDbConn::get_one(&rocket)
+        .await
+        .expect("No database connection");
+    conn.run(|c| embedded_migrations::run(c))
+        .await
+        .expect("Failed to run migrations");
+    rocket
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
         .attach(CommentDbConn::fairing())
+        .attach(AdHoc::on_ignite("Database Migrations", run_migrations))
         .manage(channel::<UpvoteUpdate>(1024).0)
         .mount(
             "/api",

@@ -1,8 +1,9 @@
 #![allow(clippy::extra_unused_lifetimes)]
-use rocket::FromForm;
-use serde::Serialize;
-
 use super::schema::comments;
+use rocket::{
+    serde::{Deserialize, Serialize},
+    FromForm,
+};
 
 #[derive(Queryable, Debug)]
 pub struct Comment {
@@ -15,6 +16,7 @@ pub struct Comment {
 }
 
 #[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
 pub struct ResComment {
     pub id: u64,
     pub children: Vec<ResComment>,
@@ -24,7 +26,8 @@ pub struct ResComment {
     pub date_posted: chrono::NaiveDateTime,
 }
 
-#[derive(serde::Deserialize, FromForm, Insertable)]
+#[derive(Deserialize, FromForm, Insertable)]
+#[serde(crate = "rocket::serde")]
 #[table_name = "comments"]
 pub struct NewComment {
     pub name: String,
